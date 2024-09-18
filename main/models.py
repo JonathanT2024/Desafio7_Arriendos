@@ -10,7 +10,6 @@ class UserProfile(models.Model):
     roles = (
         ('arrendatario', 'Arrendatario'),
         ('arrendador', 'Arrendador'),
-        ('admin', 'Admin')
     )
     direccion = models.CharField(max_length=255, blank=False)
     telefono_personal = models.CharField(max_length=20, null=True)
@@ -20,13 +19,6 @@ class UserProfile(models.Model):
         related_name='userprofile', 
         on_delete=models.CASCADE
     )
-    
-    def __str__(self):
-        nombre = self.user.first_name
-        apellido = self.user.last_name
-        usuario = self.user.username
-        rol = self.rol
-        return f'{nombre} {apellido} | {usuario} | {rol}'
 
 class Region(models.Model):
     cod = models.CharField(max_length=5, primary_key=True)
@@ -40,10 +32,7 @@ class Comuna(models.Model):
         on_delete=models.RESTRICT,
         related_name='comunas'
     )
-    def __str__(self):
-        nombre = self.nombre
-        return f'{nombre}'
-
+    
 class Inmueble(models.Model):
     inmuebles = (
         ('casa', 'Casa'),
@@ -70,52 +59,4 @@ class Inmueble(models.Model):
         related_name='inmueble',
         on_delete=models.RESTRICT
     )
-    imagen = models.ForeignKey(
-        'Imagen',
-        related_name='inmueble',
-        null= True,
-        blank= False,
-        on_delete=models.RESTRICT
-    )
-
-    def __str__(self):
-        nombre = self.nombre
-        comuna = self.comuna
-        tipo_inmueble = self.tipo_de_inmueble
-        return f'{nombre} {comuna} | {tipo_inmueble}'
-
-class Solicitud(models.Model):
-    estados = (
-        ('pendiente', 'Pendiente'),
-        ('rezachaza', 'Rechazada'),
-        ('aprobada', 'Aprobada')
-    )
-    inmueble =  models.ForeignKey(
-        Inmueble,
-        related_name='solicitudes',
-        on_delete=models.CASCADE
-    )
-    arrendador = models.ForeignKey(
-        User,
-        related_name='solicitudes',
-        on_delete=models.CASCADE 
-    )
-    fecha = models.DateTimeField(auto_now_add=True)
-    estado = models.CharField(max_length=50, choices=estados)
-
-# Genera un nombre aleatorio para guardar las imágenes
-def generar_nombre_aleatorio(instancia, archivo):
-    ext = archivo.split('.')[-1]
-    nombre_aleatorio = uuid.uuid4().hex
-    return f'img/{nombre_aleatorio}.{ext}'
-
-class Imagen(models.Model):
-    img_file = models.ImageField(upload_to=generar_nombre_aleatorio, null=True, blank=False)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-    
-    def __str__(self):
-        return self.img_file
-    
-    class Meta:
-        ordering = ['-created_at']
+   
