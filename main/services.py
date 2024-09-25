@@ -1,6 +1,7 @@
 from main.models import UserProfile, Inmueble, Comuna, Region
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
+from django.db.models import Q
 
 
 
@@ -98,3 +99,29 @@ def cambio_password(request, password:str, password_repeat:str):
     request.user.set_password(password)
     request.user.save()
     # messages.success(request, 'Contraseña actualizada exitosamente')
+
+def obtener_propiedades_comunas(filtro):
+    if filtro is None:
+        return Inmueble.objects.all().order_by('comuna')
+    return Inmueble.objects.filter(Q(nombre__icontains=filtro) | Q(descripcion__icontains=filtro) ).order_by('comuna')
+    
+def obtener_propiedades_regiones(filtro):
+    consulta = '''
+    SELECT I.nombre, I.descripcion, R.nombre as region from main_inmueble as I
+    join main_comuna as C on I.comuna_id = C.cod
+    join main_region as R on I.region_id = R.cod
+    order by R.cod
+    '''
+    if filtro is not None:
+        filtro = filtro.lower()
+        consulta = f'''
+        SELECT I.nombre, I.descripcion, R.nombre as region from main_inmueble as I
+        join main_comuna as C on I.comuna_id = C.cod
+        join main_region as R on I.region_id = R.cod           
+        where lower(I.nombre) like '%{filtro}%' or lower(I.descripcion) like '%{filtro}%'
+        order by R.cod
+        '''
+    cursor = connection.cursor()
+    cursor.execute(consulta)
+    registros = cursor.fetchall()
+    return registros
