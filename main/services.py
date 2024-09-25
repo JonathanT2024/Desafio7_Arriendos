@@ -2,6 +2,7 @@ from main.models import UserProfile, Inmueble, Comuna, Region
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from django.db.models import Q
+from django.db import connection
 
 
 
@@ -109,7 +110,7 @@ def obtener_propiedades_regiones(filtro):
     consulta = '''
     SELECT I.nombre, I.descripcion, R.nombre as region from main_inmueble as I
     join main_comuna as C on I.comuna_id = C.cod
-    join main_region as R on I.region_id = R.cod
+    join main_region as R on C.region_id = R.cod
     order by R.cod
     '''
     if filtro is not None:
@@ -117,7 +118,7 @@ def obtener_propiedades_regiones(filtro):
         consulta = f'''
         SELECT I.nombre, I.descripcion, R.nombre as region from main_inmueble as I
         join main_comuna as C on I.comuna_id = C.cod
-        join main_region as R on I.region_id = R.cod           
+        join main_region as R on C.region_id = R.cod           
         where lower(I.nombre) like '%{filtro}%' or lower(I.descripcion) like '%{filtro}%'
         order by R.cod
         '''
